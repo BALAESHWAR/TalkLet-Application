@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat Application</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-card">
+                <h1><i class="fas fa-comments"></i> Chat Room</h1>
+                <div class="form-group">
+                    <input type="text" id="usernameInput" placeholder="Enter your username" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="roomInput" placeholder="Enter room name" maxlength="30">
+                </div>
+                <button id="joinBtn" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Join Room
+                </button>
+                <div id="loginError" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Chat Screen -->
+        <div id="chatScreen" class="screen">
+            <div class="chat-container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h2>Room Info</h2>
+                        <button id="logoutBtn" class="btn-icon" title="Logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                    <div class="room-info">
+                        <div class="info-item">
+                            <span class="label">Room:</span>
+                            <span class="value" id="currentRoom">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">User:</span>
+                            <span class="value" id="currentUser">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Users Online:</span>
+                            <span class="value" id="userCount">0</span>
+                        </div>
+                    </div>
+                    <div class="users-list">
+                        <h3>Active Users</h3>
+                        <ul id="usersList"></ul>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-main">
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div class="header-left"></div>
+                        <div class="header-center">
+                            <input type="text" id="searchInput" class="search-box" placeholder="Search messages...">
+                        </div>
+                        <div class="header-right">
+                            <button id="settingsBtn" class="btn-icon" title="Settings">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button id="profileBtn" class="btn-icon" title="Profile">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Area -->
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="welcome-message">
+                            <i class="fas fa-comments-dollar"></i>
+                            Select a user to start chatting
+                        </div>
+                    </div>
+
+                    <!-- Chat Footer -->
+                    <div class="chat-footer">
+                        <input type="text" id="messageInput" placeholder="Type a message..." maxlength="500">
+                        <button id="sendBtn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="modal-close" id="settingsClose">&times;</span>
+            <h2>Settings</h2>
+            <div style="margin-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="darkModeToggle" style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Dark Mode</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 15px;">
+                    <input type="checkbox" id="notificationsToggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+                    <span>Enable Notifications</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal" style="display: none;">
+        <div class="modal-content profile-modal">
+            <span class="modal-close" id="profileClose">&times;</span>
+            <h2>User Profile</h2>
+            <div class="profile-header" style="margin-top: 20px; padding-bottom: 20px; border-bottom: 1px solid #dee2e6;">
+                <div class="profile-avatar" id="profileAvatar" style="width: 60px; height: 60px; border-radius: 50%; background: #007bff; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-bottom: 10px;"></div>
+                <div class="profile-info">
+                    <h2 id="profileName" style="margin: 0; font-size: 18px;"></h2>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #6c757d;">Online now</p>
+                </div>
+            </div>
+            <div class="profile-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                <div class="stat" style="text-align: center;">
+                    <span class="stat-label" style="display: block; font-size: 12px; color: #6c757d; margin-bottom: 5px; text-transform: uppercase;">Messages Sent</span>
+                    <span class="stat-value" id="messagesSent" style="display: block; font-size: 20px; font-weight: bold; color: #007bff;">0</span>
+                </div>
+                <div class="stat" style="text-align: center;">
+                    <span class="stat-label" style="display: block; font-size: 12px; color: #6c757d; margin-bottom: 5px; text-transform: uppercase;">Messages Received</span>
+                    <span class="stat-value" id="messagesReceived" style="display: block; font-size: 20px; font-weight: bold; color: #007bff;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emoji Reaction Modal -->
+    <div id="emojiModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 300px;">
+            <span class="modal-close" id="emojiClose">&times;</span>
+            <h2 style="margin-bottom: 15px;">React</h2>
+            <div class="emoji-grid">
+                <button class="emoji-btn" data-emoji="👍">👍</button>
+                <button class="emoji-btn" data-emoji="❤️">❤️</button>
+                <button class="emoji-btn" data-emoji="😂">😂</button>
+                <button class="emoji-btn" data-emoji="😮">😮</button>
+                <button class="emoji-btn" data-emoji="😢">😢</button>
+                <button class="emoji-btn" data-emoji="🔥">🔥</button>
+                <button class="emoji-btn" data-emoji="✨">✨</button>
+                <button class="emoji-btn" data-emoji="🎉">🎉</button>
+                <button class="emoji-btn" data-emoji="👏">👏</button>
+                <button class="emoji-btn" data-emoji="🙏">🙏</button>
+                <button class="emoji-btn" data-emoji="💯">💯</button>
+                <button class="emoji-btn" data-emoji="🚀">🚀</button>
+                <button class="emoji-btn" data-emoji="😍">😍</button>
+                <button class="emoji-btn" data-emoji="🤔">🤔</button>
+                <button class="emoji-btn" data-emoji="😎">😎</button>
+                <button class="emoji-btn" data-emoji="🎊">🎊</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
